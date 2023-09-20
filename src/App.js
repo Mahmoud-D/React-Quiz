@@ -1,23 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useReducer } from "react";
+import "./App.css";
+import Header from "./Header.js";
+import Main from "./Main";
+
+const initialState = {
+  questions: [],
+
+  // 'loading', 'error', 'ready', 'active', 'complete'
+  status: "loading",
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "dataReceived":
+      return {
+        ...state,
+        questions: action.payload,
+        status: "ready",
+      };
+    case "dataFailed":
+      return {
+        ...state,
+        status: "failed",
+      };
+    default:
+      throw new Error(" Unknown action");
+  }
+}
 
 function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  useEffect(function () {
+    fetch("http://localhost:8000/questions").then((res) =>
+      res
+        .json()
+        .then((data) => dispatch({ type: "dataReceived", payload: data }))
+        .catch((err) => dispatch({ type: "dataFailed" }))
+    );
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Header />
+      <Main>
+        <p>1/15</p>
+        <p>Qestion</p>
+      </Main>
     </div>
   );
 }
